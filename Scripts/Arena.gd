@@ -156,7 +156,7 @@ func _spawn_pickup() -> void:
 
     var pickup := PICKUP_SCENE.instantiate()
     pickup.position = _random_valid_position()
-    pickup.set_kind(randi() % 2 == 0 ? "speed" : "shield")
+    pickup.set_kind("speed" if randi() % 2 == 0 else "shield")
     add_child(pickup)
     pickups.append(pickup)
     pickup.collected.connect(_on_pickup_collected)
