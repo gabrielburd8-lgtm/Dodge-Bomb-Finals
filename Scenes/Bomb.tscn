@@ -1,0 +1,20 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Texture2D" path="res://icon.svg" id="1_uy4b1"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_4r0a2"]
+radius = 16.0
+
+[node name="Bomb" type="RigidBody2D"]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_4r0a2")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_uy4b1")
+scale = Vector2(0.18, 0.18)
+
+[node name="CountdownLabel" type="Label" parent="."]
+position = Vector2(-20, -28)
+scale = Vector2(1.2, 1.2)
+text = "2.5"
