@@ -27,6 +27,7 @@ func _show_results(title: String, _actions: Array) -> void:
     menu_button.text = "Main Menu"
     menu_button.pressed.connect(_on_main_menu_pressed)
     result_panel.add_child(menu_button)
+end
 
 func _update_hud() -> void:
     var seconds := int(match_timer)
@@ -40,3 +41,6 @@ func _update_hud() -> void:
         if players.size() >= 2:
             p1_status.text = "Player 1: " + ("Alive" if players[0].is_alive else "Eliminated")
             p2_status.text = "Player 2: " + ("Alive" if players[1].is_alive else "Eliminated")
+        end
+    end
+end
