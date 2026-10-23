@@ -267,12 +267,12 @@ func _update_hud() -> void:
 
     if Global.game_mode == "solo":
         status_label.text = "Solo Survival"
-        p1_status.text = "Player 1: " + (players[0].is_alive ? "Alive" : "Eliminated")
+        p1_status.text = "Player 1: " + ("Alive" if players[0].is_alive else "Eliminated")
     else:
         status_label.text = "2-Player Local"
         if players.size() >= 2:
-            p1_status.text = "Player 1: " + (players[0].is_alive ? "Alive" : "Eliminated")
-            p2_status.text = "Player 2: " + (players[1].is_alive ? "Alive" : "Eliminated")
+            p1_status.text = "Player 1: " + ("Alive" if players[0].is_alive else "Eliminated")
+            p2_status.text = "Player 2: " + ("Alive" if players[1].is_alive else "Eliminated")
 
 func _on_retry_pressed() -> void:
     get_tree().reload_current_scene()
