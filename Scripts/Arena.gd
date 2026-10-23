@@ -173,7 +173,7 @@ func _random_valid_position() -> Vector2:
         return candidate
     return Vector2(960, 540)
 
-func _on_bomb_exploded(bomb: Node) -> void:
+func _on_bomb_exploded(bomb: Node2D) -> void:
     if not bombs.has(bomb):
         return
 
@@ -184,9 +184,10 @@ func _on_bomb_exploded(bomb: Node) -> void:
     for player in players:
         if not player.is_alive:
             continue
-        var distance := player.global_position.distance_to(bomb.global_position)
+
+        var distance: float = player.global_position.distance_to(bomb.global_position)
         if distance < bomb.blast_radius:
-            var direction := (player.global_position - bomb.global_position).normalized()
+            var direction: Vector2 = (player.global_position - bomb.global_position).normalized()
             player.apply_explosion_knockback(direction, (1.0 - distance / bomb.blast_radius) * 800.0)
             if player.has_shield():
                 player.consume_shield()
@@ -196,14 +197,15 @@ func _on_bomb_exploded(bomb: Node) -> void:
     for other in bombs:
         if other == bomb:
             continue
-        var distance := other.global_position.distance_to(bomb.global_position)
+
+        var distance: float = other.global_position.distance_to(bomb.global_position)
         if distance < bomb.blast_radius:
-            var direction := (other.global_position - bomb.global_position).normalized()
+            var direction: Vector2 = (other.global_position - bomb.global_position).normalized()
             other.apply_central_impulse(direction * 800.0)
 
     _check_game_result()
 
-func _on_pickup_collected(kind: String, pickup: Node) -> void:
+func _on_pickup_collected(kind: String, pickup: Node2D) -> void:
     if pickups.has(pickup):
         pickups.erase(pickup)
     for player in players:
