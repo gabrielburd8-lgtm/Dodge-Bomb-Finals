@@ -1,99 +1,94 @@
-extends CharacterBody2D
+extends Control
 
-const MAX_SPEED := 260.0
-const BOOST_MULTIPLIER := 1.7
-const ACCELERATION := 1600.0
-const FRICTION := 1800.0
+const SWATCH_SIZE := Vector2(52, 52)
+const BACKGROUND_COLOR := Color("#071426")
+const PANEL_COLOR := Color("#102B4C")
+const BUTTON_COLOR := Color("#164B83")
 
-var input_prefix: String = "p1"
-var player_name: String = "Player 1"
-var is_alive: bool = true
-var speed_boost_timer: float = 0.0
-var shield_timer: float = 0.0
-var shield_active: bool = false
+var current_player: int = 1
 
-@onready var sprite: Sprite2D = $Sprite2D
-@onready var shield_sprite: Sprite2D = $ShieldSprite
+@onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
+@onready var player_selector: HBoxContainer = $MarginContainer/VBoxContainer/PlayerSelector
+@onready var preview_panel: Panel = $MarginContainer/VBoxContainer/PreviewPanel
+@onready var preview_color: ColorRect = $MarginContainer/VBoxContainer/PreviewPanel/PreviewColor
+@onready var p1_button: Button = $MarginContainer/VBoxContainer/PlayerSelector/P1Button
+@onready var p2_button: Button = $MarginContainer/VBoxContainer/PlayerSelector/P2Button
+@onready var swatch_container: GridContainer = $MarginContainer/VBoxContainer/SwatchContainer
+@onready var back_button: Button = $MarginContainer/VBoxContainer/BackButton
 
 func _ready() -> void:
-    shield_sprite.visible = false
-    sprite.modulate = Color("#1677FF")
+    _apply_theme()
+    _build_palette()
+    _set_current_player(1)
+    p1_button.pressed.connect(func() -> void:
+        _set_current_player(1)
+    )
+    p2_button.pressed.connect(func() -> void:
+        _set_current_player(2)
+    )
+    back_button.pressed.connect(_on_back_pressed)
 
-func configure(name_value: String, prefix: String, color: Color) -> void:
-    player_name = name_value
-    input_prefix = prefix
-    sprite.modulate = color
-    shield_sprite.modulate = color
+func _apply_theme() -> void:
+    title_label.add_theme_color_override("font_color", Color("#FFFFFF"))
+    title_label.add_theme_font_size_override("font_size", 52)
 
-func _physics_process(delta: float) -> void:
-    if not is_alive:
-        return
+    for button in [p1_button, p2_button, back_button]:
+        button.modulate = BUTTON_COLOR
+        button.add_theme_color_override("font_color", Color("#FFFFFF"))
+        button.custom_minimum_size = Vector2(180, 48)
 
-    if speed_boost_timer > 0.0:
-        speed_boost_timer -= delta
-    if shield_timer > 0.0:
-        shield_timer -= delta
-        if shield_timer <= 0.0:
-            shield_active = false
-            shield_sprite.visible = false
+    preview_panel.modulate = PANEL_COLOR
+    preview_color.color = Global.player_1_color
 
-    var direction := Vector2.ZERO
-    direction.x = (1 if Input.is_action_pressed(input_prefix + "_right") else 0) - (1 if Input.is_action_pressed(input_prefix + "_left") else 0)
-    direction.y = (1 if Input.is_action_pressed(input_prefix + "_down") else 0) - (1 if Input.is_action_pressed(input_prefix + "_up") else 0)
-    if direction.length() > 1.0:
-        direction = direction.normalized()
+func _build_palette() -> void:
+    for child in swatch_container.get_children():
+        child.queue_free()
 
-    var current_speed := MAX_SPEED
-    if speed_boost_timer > 0.0:
-        current_speed *= BOOST_MULTIPLIER
+    var palette = Global.get_palette_colors()
+    for color in palette:
+        var swatch := Button.new()
+        swatch.toggle_mode = true
+        swatch.focus_mode = Control.FOCUS_NONE
+        swatch.custom_minimum_size = SWATCH_SIZE
+        swatch.modulate = color
+        swatch.set_meta("color", color)
+        swatch.pressed.connect(_on_swatch_pressed.bind(color))
+        swatch_container.add_child(swatch)
 
-    var target_velocity := direction * current_speed
-    if direction == Vector2.ZERO:
-        velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+    _refresh_palette_selection()
+
+func _on_swatch_pressed(color: Color) -> void:
+    if current_player == 1:
+        Global.player_1_color = color
     else:
-        velocity = velocity.move_toward(target_velocity, ACCELERATION * delta)
+        Global.player_2_color = color
 
-    move_and_slide()
-    position.x = clamp(position.x, 80.0, 1840.0)
-    position.y = clamp(position.y, 80.0, 1000.0)
+    _refresh_palette_selection()
+    _update_preview()
 
-    if Input.is_action_just_pressed(input_prefix + "_ability"):
-        use_ability()
+func _set_current_player(player_number: int) -> void:
+    current_player = player_number
+    p1_button.button_pressed = current_player == 1
+    p2_button.button_pressed = current_player == 2
+    _refresh_palette_selection()
+    _update_preview()
 
-func apply_explosion_knockback(direction: Vector2, force: float) -> void:
-    velocity += direction * (force / 10.0)
+func _refresh_palette_selection() -> void:
+    for child in swatch_container.get_children():
+        if child is Button:
+            var color: Color = child.get_meta("color")
+            var selected_color: Color
+            if current_player == 1:
+                selected_color = Global.player_1_color
+            else:
+                selected_color = Global.player_2_color
+            child.button_pressed = color == selected_color
 
-func use_ability() -> void:
-    if speed_boost_timer > 0.0:
-        if not shield_active:
-            shield_active = true
-            shield_timer = 1.5
-            shield_sprite.visible = true
-            return
-    if speed_boost_timer <= 0.0:
-        speed_boost_timer = 4.0
-        return
-    if not shield_active:
-        shield_active = true
-        shield_timer = 1.5
-        shield_sprite.visible = true
+func _update_preview() -> void:
+    if current_player == 1:
+        preview_color.color = Global.player_1_color
+    else:
+        preview_color.color = Global.player_2_color
 
-func has_shield() -> bool:
-    return shield_active and shield_timer > 0.0
-
-func consume_shield() -> void:
-    shield_active = false
-    shield_timer = 0.0
-    shield_sprite.visible = false
-
-func apply_pickup(kind: String) -> void:
-    if kind == "speed":
-        speed_boost_timer = 4.0
-    elif kind == "shield":
-        shield_active = true
-        shield_timer = 6.0
-        shield_sprite.visible = true
-
-func eliminate() -> void:
-    is_alive = false
-    visible = false
+func _on_back_pressed() -> void:
+    get_tree().change_scene_to_file("res://Scenes/MainMenu.tscn")

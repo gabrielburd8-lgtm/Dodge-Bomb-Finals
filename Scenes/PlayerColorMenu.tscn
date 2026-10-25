@@ -1,15 +1,15 @@
 [gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/PlayerColorMenu.gd" id="1_2d28t"]
+[ext_resource type="Script" path="res://Scripts/MainMenu.gd" id="1_bg2wb"]
 
-[node name="PlayerColorMenu" type="Control"]
+[node name="MainMenu" type="Control"]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-script = ExtResource("1_2d28t")
+script = ExtResource("1_bg2wb")
 
 [node name="Background" type="ColorRect" parent="."]
 layout_mode = 1
@@ -18,17 +18,17 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.08, 0.09, 0.14, 1)
+color = Color(0.03, 0.08, 0.15, 1)
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 60.0
-offset_top = 60.0
-offset_right = -60.0
-offset_bottom = -60.0
+offset_left = 64.0
+offset_top = 64.0
+offset_right = -64.0
+offset_bottom = -64.0
 grow_horizontal = 2
 grow_vertical = 2
 
@@ -39,45 +39,34 @@ theme_override_constants/separation = 18
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Player Colors"
-theme_override_font_sizes/font_size = 48
+text = "DODGE BOMB"
+theme_override_font_sizes/font_size = 82
 horizontal_alignment = 1
 
-[node name="PlayerSelector" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="SoloButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-alignment = 1
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 64)
+text = "Solo Mode"
+theme_override_font_sizes/font_size = 24
 
-automatically_add_to_group = []
-
-[node name="P1Button" type="Button" parent="MarginContainer/VBoxContainer/PlayerSelector"]
+[node name="VersusButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Player 1"
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 64)
+text = "2-Player Local Mode"
+theme_override_font_sizes/font_size = 24
 
-[node name="P2Button" type="Button" parent="MarginContainer/VBoxContainer/PlayerSelector"]
+[node name="ColorButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Player 2"
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 64)
+text = "Player Colors"
+theme_override_font_sizes/font_size = 24
 
-[node name="PreviewPanel" type="Panel" parent="MarginContainer/VBoxContainer"]
-custom_minimum_size = Vector2(220, 120)
+[node name="ExitButton" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-
-[node name="PreviewColor" type="ColorRect" parent="MarginContainer/VBoxContainer/PreviewPanel"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 18.0
-offset_top = 18.0
-offset_right = -18.0
-offset_bottom = -18.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0.09, 0.47, 1, 1)
-
-[node name="SwatchContainer" type="GridContainer" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-columns = 5
-
-[node name="BackButton" type="Button" parent="MarginContainer/VBoxContainer"]
-layout_mode = 2
-text = "Back"
+size_flags_horizontal = 3
+custom_minimum_size = Vector2(0, 64)
+text = "Exit Game"
+theme_override_font_sizes/font_size = 24

@@ -1,58 +1,49 @@
 extends Control
 
-const SWATCH_SIZE := Vector2(50, 50)
-
-var current_player: int = 1
+const NAVY_BG := Color("#071426")
+const PANEL_BG := Color("#102B4C")
+const BUTTON_BG := Color("#164B83")
+const BUTTON_HOVER := Color("#1D5EA8")
+const TEXT_LIGHT := Color("#F2F9FF")
 
 @onready var title_label: Label = $MarginContainer/VBoxContainer/TitleLabel
-@onready var player_selector: HBoxContainer = $MarginContainer/VBoxContainer/PlayerSelector
-@onready var preview_panel: Panel = $MarginContainer/VBoxContainer/PreviewPanel
-@onready var preview_color: ColorRect = $MarginContainer/VBoxContainer/PreviewPanel/PreviewColor
-@onready var p1_button: Button = $MarginContainer/VBoxContainer/PlayerSelector/P1Button
-@onready var p2_button: Button = $MarginContainer/VBoxContainer/PlayerSelector/P2Button
-@onready var swatch_container: GridContainer = $MarginContainer/VBoxContainer/SwatchContainer
-@onready var back_button: Button = $MarginContainer/VBoxContainer/BackButton
+@onready var solo_button: Button = $MarginContainer/VBoxContainer/SoloButton
+@onready var versus_button: Button = $MarginContainer/VBoxContainer/VersusButton
+@onready var color_button: Button = $MarginContainer/VBoxContainer/ColorButton
+@onready var exit_button: Button = $MarginContainer/VBoxContainer/ExitButton
 
 func _ready() -> void:
-    _build_palette()
-    _update_preview()
-    p1_button.pressed.connect(func() -> void:
-        current_player = 1
-        _update_preview()
-    )
-    p2_button.pressed.connect(func() -> void:
-        current_player = 2
-        _update_preview()
-    )
-    back_button.pressed.connect(_on_back_pressed)
+    _apply_theme()
+    solo_button.pressed.connect(_on_solo_pressed)
+    versus_button.pressed.connect(_on_versus_pressed)
+    color_button.pressed.connect(_on_color_pressed)
+    exit_button.pressed.connect(_on_exit_pressed)
 
-func _build_palette() -> void:
-    for child in swatch_container.get_children():
-        child.queue_free()
-    var palette = Global.get_palette_colors()
-    for color in palette:
-        var button := Button.new()
-        button.custom_minimum_size = SWATCH_SIZE
-        button.modulate = color
-        button.pressed.connect(_on_swatch_pressed.bind(color))
-        swatch_container.add_child(button)
+func _apply_theme() -> void:
+    self.modulate = Color(1, 1, 1, 1)
+    title_label.text = "DODGE BOMB"
+    title_label.add_theme_color_override("font_color", Color("#FFFFFF"))
+    title_label.add_theme_font_size_override("font_size", 84)
 
-func _on_swatch_pressed(color: Color) -> void:
-    if current_player == 1:
-        Global.player_1_color = color
-    else:
-        Global.player_2_color = color
-    _update_preview()
+    for button in [solo_button, versus_button, color_button, exit_button]:
+        button.focus_mode = Control.FOCUS_ALL
+        button.modulate = BUTTON_BG
+        button.add_theme_color_override("font_color", TEXT_LIGHT)
+        button.add_theme_color_override("font_hover_color", TEXT_LIGHT)
+        button.add_theme_color_override("font_pressed_color", Color("#B8D9FF"))
+        button.custom_minimum_size = Vector2(360, 68)
+        button.add_theme_font_size_override("font_size", 24)
 
-func _update_preview() -> void:
-    if current_player == 1:
-        p1_button.button_pressed = true
-        p2_button.button_pressed = false
-        preview_color.color = Global.player_1_color
-    else:
-        p1_button.button_pressed = false
-        p2_button.button_pressed = true
-        preview_color.color = Global.player_2_color
+func _on_solo_pressed() -> void:
+    Global.game_mode = "solo"
+    get_tree().change_scene_to_file("res://Scenes/Arena.tscn")
 
-func _on_back_pressed() -> void:
-    get_tree().change_scene_to_file("res://Scenes/MainMenu.tscn")
+func _on_versus_pressed() -> void:
+    Global.game_mode = "versus"
+    get_tree().change_scene_to_file("res://Scenes/Arena.tscn")
+
+func _on_color_pressed() -> void:
+    get_tree().change_scene_to_file("res://Scenes/PlayerColorMenu.tscn")
+
+func _on_exit_pressed() -> void:
+    get_tree().quit()
