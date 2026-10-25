@@ -1,97 +1,127 @@
 extends CharacterBody2D
 
-const MAX_SPEED := 260.0
-const BOOST_MULTIPLIER := 1.7
-const ACCELERATION := 1600.0
-const FRICTION := 1800.0
+const BASE_SPEED := 220.0
+const DASH_SPEED := 560.0
+const ACCELERATION := 1800.0
+const FRICTION := 1400.0
+const SHIELD_DURATION := 10.0
 
 var input_prefix: String = "input_p1"
 var player_name: String = "Player 1"
 var is_alive: bool = true
-var speed_boost_timer: float = 0.0
+var ability_kind: String = "none"
+var ability_inventory: String = "none"
+var dash_timer: float = 0.0
+var dash_cooldown: float = 0.0
 var shield_timer: float = 0.0
-var shield_active: bool = false
+var shield_cooldown: float = 0.0
+var last_direction: Vector2 = Vector2.RIGHT
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var shield_sprite: Sprite2D = $ShieldSprite
+@onready var status_label: Label = $NameLabel
 
 func _ready() -> void:
-    add_to_group("players")
-    shield_sprite.visible = false
-    sprite.modulate = Color("#1677FF")
+    if shield_sprite != null:
+        shield_sprite.visible = false
+    if status_label != null:
+        status_label.text = player_name
 
 func configure(name_value: String, prefix: String, color: Color) -> void:
     player_name = name_value
     input_prefix = "input_" + prefix
+    ability_kind = Global.get_ability_for_color(color)
+    ability_inventory = ability_kind
     sprite.modulate = color
-    shield_sprite.modulate = color
+    if shield_sprite != null:
+        shield_sprite.modulate = color
+    if status_label != null:
+        status_label.text = player_name
 
 func _physics_process(delta: float) -> void:
     if not is_alive:
         return
 
-    if speed_boost_timer > 0.0:
-        speed_boost_timer = max(0.0, speed_boost_timer - delta)
+    if dash_timer > 0.0:
+        dash_timer = max(0.0, dash_timer - delta)
+    if dash_cooldown > 0.0:
+        dash_cooldown = max(0.0, dash_cooldown - delta)
     if shield_timer > 0.0:
         shield_timer = max(0.0, shield_timer - delta)
         if shield_timer <= 0.0:
-            shield_active = false
             shield_sprite.visible = false
+    if shield_cooldown > 0.0:
+        shield_cooldown = max(0.0, shield_cooldown - delta)
 
     var direction := Vector2.ZERO
-    direction.x = (1 if Input.is_action_pressed(input_prefix + "_right") else 0) - (1 if Input.is_action_pressed(input_prefix + "_left") else 0)
-    direction.y = (1 if Input.is_action_pressed(input_prefix + "_down") else 0) - (1 if Input.is_action_pressed(input_prefix + "_up") else 0)
+    direction.x = float(Input.is_action_pressed(input_prefix + "_right")) - float(Input.is_action_pressed(input_prefix + "_left"))
+    direction.y = float(Input.is_action_pressed(input_prefix + "_down")) - float(Input.is_action_pressed(input_prefix + "_up"))
     if direction.length() > 1.0:
         direction = direction.normalized()
+    if direction != Vector2.ZERO:
+        last_direction = direction
 
-    var current_speed := MAX_SPEED
-    if speed_boost_timer > 0.0:
-        current_speed *= BOOST_MULTIPLIER
-
-    var target_velocity := direction * current_speed
-    if direction == Vector2.ZERO:
-        velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+    if dash_timer > 0.0:
+        velocity = last_direction.normalized() * DASH_SPEED
     else:
-        velocity = velocity.move_toward(target_velocity, ACCELERATION * delta)
+        var target_velocity := direction * BASE_SPEED
+        if direction == Vector2.ZERO:
+            velocity = velocity.move_toward(Vector2.ZERO, FRICTION * delta)
+        else:
+            velocity = velocity.move_toward(target_velocity, ACCELERATION * delta)
 
     move_and_slide()
-    position.x = clamp(position.x, 80.0, 1840.0)
-    position.y = clamp(position.y, 80.0, 1000.0)
+    position.x = clamp(position.x, 90.0, 1830.0)
+    position.y = clamp(position.y, 90.0, 990.0)
 
-    if Input.is_action_just_pressed(input_prefix + "_ability"):
-        use_ability()
-
-func apply_explosion_knockback(direction: Vector2, force: float) -> void:
-    velocity += direction * (force / 10.0)
+func collect_pickup(kind: String) -> void:
+    if ability_kind == "none":
+        return
+    if kind == ability_kind and ability_inventory == "none":
+        ability_inventory = kind
 
 func use_ability() -> void:
-    if shield_active and shield_timer > 0.0:
+    if not is_alive:
+        return
+    if ability_inventory == "dash":
+        if dash_cooldown > 0.0:
+            return
+        dash_timer = 0.18
+        dash_cooldown = 1.2
+        velocity = last_direction.normalized() * DASH_SPEED
         return
 
-    if speed_boost_timer > 0.0:
-        shield_active = true
-        shield_timer = 1.5
+    if ability_inventory == "shield":
+        if shield_cooldown > 0.0 or shield_timer > 0.0:
+            return
+        shield_timer = SHIELD_DURATION
+        shield_cooldown = 3.0
         shield_sprite.visible = true
-        return
-
-    speed_boost_timer = 4.0
 
 func has_shield() -> bool:
-    return shield_active and shield_timer > 0.0
+    return shield_timer > 0.0 and is_alive
 
 func consume_shield() -> void:
-    shield_active = false
     shield_timer = 0.0
     shield_sprite.visible = false
 
-func apply_pickup(kind: String) -> void:
-    if kind == "speed":
-        speed_boost_timer = 4.0
-    elif kind == "shield":
-        shield_active = true
-        shield_timer = 6.0
-        shield_sprite.visible = true
+func apply_explosion_knockback(direction: Vector2, force: float) -> void:
+    velocity += direction * force * 0.06
 
 func eliminate() -> void:
+    if not is_alive:
+        return
     is_alive = false
     visible = false
+    velocity = Vector2.ZERO
+    shield_sprite.visible = false
+
+func reset_state() -> void:
+    is_alive = true
+    visible = true
+    dash_timer = 0.0
+    dash_cooldown = 0.0
+    shield_timer = 0.0
+    shield_cooldown = 0.0
+    ability_inventory = ability_kind
+    shield_sprite.visible = false
