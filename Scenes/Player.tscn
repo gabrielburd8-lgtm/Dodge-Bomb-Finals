@@ -1,29 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
-[ext_resource type="Script" path="res://Scripts/Player.gd" id="1_abc789"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_icon"]
+[ext_resource type="Script" path="res://Scripts/Arena.gd" id="1_arena"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_1"]
-radius = 18.0
-
-[node name="Player" type="CharacterBody2D"]
-script = ExtResource("1_abc789")
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_1")
-
-[node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_icon")
-scale = Vector2(0.3, 0.3)
-
-[node name="ShieldSprite" type="Sprite2D" parent="."]
-texture = ExtResource("2_icon")
-scale = Vector2(0.6, 0.6)
-modulate = Color(0.35, 0.9, 1.0, 0.45)
-
-[node name="NameLabel" type="Label" parent="."]
-position = Vector2(-40, -38)
-size = Vector2(80, 20)
-text = "Player"
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="Arena" type="Node2D"]
+script = ExtResource("1_arena")

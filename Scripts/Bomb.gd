@@ -19,24 +19,27 @@ var last_direction: Vector2 = Vector2.RIGHT
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var shield_sprite: Sprite2D = $ShieldSprite
-@onready var status_label: Label = $NameLabel
+@onready var name_label: Label = $NameLabel
 
 func _ready() -> void:
+    if sprite != null:
+        sprite.modulate = Color("#1677FF")
     if shield_sprite != null:
         shield_sprite.visible = false
-    if status_label != null:
-        status_label.text = player_name
+    if name_label != null:
+        name_label.text = player_name
 
 func configure(name_value: String, prefix: String, color: Color) -> void:
     player_name = name_value
     input_prefix = "input_" + prefix
     ability_kind = Global.get_ability_for_color(color)
     ability_inventory = ability_kind
-    sprite.modulate = color
+    if sprite != null:
+        sprite.modulate = color
     if shield_sprite != null:
         shield_sprite.modulate = color
-    if status_label != null:
-        status_label.text = player_name
+    if name_label != null:
+        name_label.text = player_name
 
 func _physics_process(delta: float) -> void:
     if not is_alive:
@@ -48,7 +51,7 @@ func _physics_process(delta: float) -> void:
         dash_cooldown = max(0.0, dash_cooldown - delta)
     if shield_timer > 0.0:
         shield_timer = max(0.0, shield_timer - delta)
-        if shield_timer <= 0.0:
+        if shield_timer <= 0.0 and shield_sprite != null:
             shield_sprite.visible = false
     if shield_cooldown > 0.0:
         shield_cooldown = max(0.0, shield_cooldown - delta)
@@ -71,8 +74,8 @@ func _physics_process(delta: float) -> void:
             velocity = velocity.move_toward(target_velocity, ACCELERATION * delta)
 
     move_and_slide()
-    position.x = clamp(position.x, 90.0, 1830.0)
-    position.y = clamp(position.y, 90.0, 990.0)
+    position.x = clamp(position.x, 90.0, 1190.0)
+    position.y = clamp(position.y, 90.0, 630.0)
 
 func collect_pickup(kind: String) -> void:
     if ability_kind == "none":
@@ -83,6 +86,7 @@ func collect_pickup(kind: String) -> void:
 func use_ability() -> void:
     if not is_alive:
         return
+
     if ability_inventory == "dash":
         if dash_cooldown > 0.0:
             return
@@ -96,14 +100,16 @@ func use_ability() -> void:
             return
         shield_timer = SHIELD_DURATION
         shield_cooldown = 3.0
-        shield_sprite.visible = true
+        if shield_sprite != null:
+            shield_sprite.visible = true
 
 func has_shield() -> bool:
     return shield_timer > 0.0 and is_alive
 
 func consume_shield() -> void:
     shield_timer = 0.0
-    shield_sprite.visible = false
+    if shield_sprite != null:
+        shield_sprite.visible = false
 
 func apply_explosion_knockback(direction: Vector2, force: float) -> void:
     velocity += direction * force * 0.06
@@ -114,7 +120,8 @@ func eliminate() -> void:
     is_alive = false
     visible = false
     velocity = Vector2.ZERO
-    shield_sprite.visible = false
+    if shield_sprite != null:
+        shield_sprite.visible = false
 
 func reset_state() -> void:
     is_alive = true
@@ -124,4 +131,5 @@ func reset_state() -> void:
     shield_timer = 0.0
     shield_cooldown = 0.0
     ability_inventory = ability_kind
-    shield_sprite.visible = false
+    if shield_sprite != null:
+        shield_sprite.visible = false

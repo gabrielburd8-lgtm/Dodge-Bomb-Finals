@@ -1,24 +1,29 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
-[ext_resource type="Script" path="res://Scripts/Bomb.gd" id="1_bomb_script"]
-[ext_resource type="Texture2D" path="res://icon.svg" id="2_bomb_icon"]
+[ext_resource type="Script" path="res://Scripts/Player.gd" id="1_player_script"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="2_player_icon"]
 
-[sub_resource type="CircleShape2D" id="CircleShape2D_Bomb"]
-radius = 25.0
+[sub_resource type="CircleShape2D" id="CircleShape2D_Player"]
+radius = 18.0
 
-[node name="Bomb" type="Area2D"]
-script = ExtResource("1_bomb_script")
+[node name="Player" type="CharacterBody2D"]
+script = ExtResource("1_player_script")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
-shape = SubResource("CircleShape2D_Bomb")
+shape = SubResource("CircleShape2D_Player")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
-texture = ExtResource("2_bomb_icon")
-scale = Vector2(1.0, 1.0)
+texture = ExtResource("2_player_icon")
+scale = Vector2(0.3, 0.3)
 
-[node name="CountdownLabel" type="Label" parent="."]
-position = Vector2(-18, -18)
-size = Vector2(36, 20)
-text = "2.6"
+[node name="ShieldSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_player_icon")
+scale = Vector2(0.6, 0.6)
+modulate = Color(0.35, 0.9, 1.0, 0.45)
+
+[node name="NameLabel" type="Label" parent="."]
+position = Vector2(-40, -35)
+size = Vector2(80, 20)
+text = "Player"
 horizontal_alignment = 1
 vertical_alignment = 1

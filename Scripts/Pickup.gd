@@ -3,7 +3,7 @@ extends Area2D
 signal exploded(bomb: Node)
 
 var countdown: float = 2.6
-var blast_radius: float = 180.0
+var blast_radius: float = 200.0
 var active: bool = true
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -18,6 +18,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
     if not active:
         return
+
     countdown = max(0.0, countdown - delta)
     countdown_label.text = "%0.1f" % countdown
 
