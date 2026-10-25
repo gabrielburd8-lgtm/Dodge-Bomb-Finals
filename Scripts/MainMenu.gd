@@ -13,15 +13,14 @@ func _ready() -> void:
     exit_button.pressed.connect(_on_exit_pressed)
 
 func _apply_theme() -> void:
-    self.modulate = Color(1, 1, 1, 1)
     for button in [solo_button, versus_button, color_button, exit_button]:
         button.focus_mode = Control.FOCUS_ALL
         button.modulate = Color("#164B83")
         button.add_theme_color_override("font_color", Color("#F2F9FF"))
         button.add_theme_color_override("font_hover_color", Color("#F2F9FF"))
         button.add_theme_color_override("font_pressed_color", Color("#B8D9FF"))
-        button.custom_minimum_size = Vector2(360, 68)
-        button.add_theme_font_size_override("font_size", 24)
+        button.custom_minimum_size = Vector2(360, 58)
+        button.add_theme_font_size_override("font_size", 20)
 
 func _on_solo_pressed() -> void:
     Global.game_mode = "solo"
